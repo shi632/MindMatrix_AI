@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind Matrix – Mental Health Diagnostics</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+
+<body>
+
+  <!-- BACKGROUND ORBS -->
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-mark">M</div>
+        <span class="logo-name">Mind Matrix</span>
+      </div>
+      <div class="nav-actions" style="display: flex; align-items: center; gap: 12px;">
+        <span class="nav-pill">AI · ABES Institute of Technology</span>
+        <span id="navUsernameDisplay"
+          style="display:none; font-weight: 600; color: var(--teal); font-size: 14px; background: var(--bg2); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border);"></span>
+        <button id="historyBtn" class="btn ghost" style="display:none; padding: 6px 12px; font-size: 14px;"
+          onclick="Auth.openHistory()">History</button>
+        <button id="logoutBtn" class="btn ghost" style="display:none; padding: 6px 12px; font-size: 14px;"
+          onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN WRAP ══ -->
+  <main class="wrap">
+
+    <!-- HERO -->
+    <section class="hero" id="heroSection">
+      <div class="hero-tag">
+        <span class="live-dot"></span>
+        Naive Bayes Mental Health Classifier
+      </div>
+      <h1>How are you feeling <em>today?</em></h1>
+      <p class="hero-sub">
+        Enter your details and share how you feel. Our AI-powered system
+        classifies your mental state and provides personalised guidance.
+      </p>
+    </section>
+
+    <!-- STEP BAR -->
+    <div class="step-bar" id="stepBar">
+      <div class="step-item" id="stepItem1">
+        <div class="step-circle active" id="stepCircle1">1</div>
+        <span class="step-label active" id="stepLabel1">Registration</span>
+      </div>
+      <div class="step-connector" id="stepLine1"></div>
+      <div class="step-item" id="stepItem2">
+        <div class="step-circle" id="stepCircle2">2</div>
+        <span class="step-label" id="stepLabel2">Your Mood</span>
+      </div>
+      <div class="step-connector" id="stepLine2"></div>
+      <div class="step-item" id="stepItem3">
+        <div class="step-circle" id="stepCircle3">3</div>
+        <span class="step-label" id="stepLabel3">Symptoms</span>
+      </div>
+      <div class="step-connector" id="stepLine3"></div>
+      <div class="step-item" id="stepItem4">
+        <div class="step-circle" id="stepCircle4">4</div>
+        <span class="step-label" id="stepLabel4">Report</span>
+      </div>
+    </div>
+
+    <!-- ════════════ SCREEN 0 : LOGIN / REGISTER ════════════ -->
+    <div id="screen0" class="screen active">
+      <div class="card center-card" style="max-width: 420px; margin: 40px auto; padding: 40px 30px;">
+        <div class="card-head" style="text-align: center; margin-bottom: 30px;">
+          <div style="font-size: 3rem; margin-bottom: 15px;">🧠</div>
+          <h2 id="authTitle" style="font-size: 1.8rem;">Welcome</h2>
+          <p id="authSubtitle" style="color: var(--text-muted); margin-top: 8px;">Log in to access your dashboard</p>
+        </div>
+
+        <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+          <label for="authUsername">Username</label>
+          <input type="text" id="authUsername" placeholder="Enter username" style="width: 100%;" />
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 24px;">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" placeholder="Enter password" style="width: 100%;" />
+        </div>
+
+        <span class="err-msg" id="authError" style="display:none; text-align: center; margin-bottom: 15px;"></span>
+
+        <div class="btn-row center" style="flex-direction: column; gap: 12px; margin-top: 10px;">
+          <button class="btn primary" id="authSubmitBtn" onclick="Auth.submit()"
+            style="width: 100%; justify-content: center;">Login</button>
+          <button class="btn ghost" id="authToggleBtn" onclick="Auth.toggleMode()"
+            style="width: 100%; justify-content: center;">Don't have an account? Register</button>
+        </div>
+      </div>
+    </div><!-- /screen0 -->
+
+    <!-- ════════════ SCREEN 1 : REGISTRATION ════════════ -->
+    <div id="screen1" class="screen">
+      <div class="card">
+        <div class="card-head">
+          <h2>Patient Registration</h2>
+          <p>Enter your student / patient details to begin.</p>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="regNo">Registration / Roll Number <span class="req">*</span></label>
+            <input type="text" id="regNo" placeholder="e.g. 2202901520152" maxlength="25" />
+            <span class="err-msg" id="errReg">Please enter your registration number.</span>
+          </div>
+          <div class="form-group">
+            <label for="fullName">Full Name <span class="req">*</span></label>
+            <input type="text" id="fullName" placeholder="e.g. Shivam Kumar Sharma" />
+            <span class="err-msg" id="errName">Please enter your full name.</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ageInput">Age</label>
+            <input type="number" id="ageInput" placeholder="e.g. 21" min="10" max="100" />
+          </div>
+          <div class="form-group">
+            <label for="genderSel">Gender</label>
+            <select id="genderSel">
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Non-binary</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="statusSel">Academic / Professional Status</label>
+          <select id="statusSel">
+            <option value="">Select status</option>
+            <option>B.Tech Student</option>
+            <option>M.Tech Student</option>
+            <option>PhD Student</option>
+            <option>Working Professional</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="btn-row right">
+          <button class="btn primary" onclick="App.step1Next()">
+            Continue <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div><!-- /screen1 -->
+
+    <!-- ════════════ SCREEN 2 : MOOD & FEELINGS ════════════ -->
+    <div id="screen2" class="screen">
+      <div class="card">
+        <div class="card-head">
+          <h2>How are you feeling right now?</h2>
+          <p>Tap the emoji that best matches your current mood.</p>
+        </div>
+        <div class="mood-grid" id="moodGrid">
+          <button class="mood-btn" data-mood="Very Bad" data-emoji="😞" onclick="App.selectMood(this)"><span
+              class="moji">😞</span><span class="mlabel">Very Bad</span></button>
+          <button class="mood-btn" data-mood="Bad" data-emoji="😔" onclick="App.selectMood(this)"><span
+              class="moji">😔</span><span class="mlabel">Bad</span></button>
+          <button class="mood-btn" data-mood="Okay" data-emoji="😐" onclick="App.selectMood(this)"><span
+              class="moji">😐</span><span class="mlabel">Okay</span></button>
+          <button class="mood-btn" data-mood="Good" data-emoji="🙂" onclick="App.selectMood(this)"><span
+              class="moji">🙂</span><span class="mlabel">Good</span></button>
+          <button class="mood-btn" data-mood="Very Good" data-emoji="😊" onclick="App.selectMood(this)"><span
+              class="moji">😊</span><span class="mlabel">Very Good</span></button>
+        </div>
+        <span class="err-msg" id="errMood" style="margin-top:6px;display:none">Please select a mood.</span>
+      </div>
+
+      <div class="card mt">
+        <div class="card-head">
+          <h2>Tell us more in your own words</h2>
+          <p>Write freely — the more you share, the better the assessment.</p>
+        </div>
+        <div class="form-group">
+          <label for="feelingsText">What's on your mind?</label>
+          <textarea id="feelingsText" rows="5"
+            placeholder="e.g. I have been very anxious lately. I can't sleep and keep worrying about exams. I feel exhausted and find it hard to focus on anything..."></textarea>
+        </div>
+
+        <!-- SLEEP SLIDER -->
+        <div class="form-group">
+          <label>Sleep quality last night &nbsp;<strong id="sleepOut" class="slider-readout">5 / 10</strong></label>
+          <input type="range" id="sleepSlider" min="1" max="10" value="5" oninput="App.updateSlider(this,'sleepOut')" />
+          <div class="slider-ends"><span>Very poor</span><span>Excellent</span></div>
+        </div>
+
+        <!-- ENERGY SLIDER -->
+        <div class="form-group" style="margin-bottom:0">
+          <label>Energy level today &nbsp;<strong id="energyOut" class="slider-readout">5 / 10</strong></label>
+          <input type="range" id="energySlider" min="1" max="10" value="5"
+            oninput="App.updateSlider(this,'energyOut')" />
+          <div class="slider-ends"><span>Exhausted</span><span>Full energy</span></div>
+        </div>
+
+        <div class="btn-row spread">
+          <button class="btn ghost" onclick="App.goTo(1)">← Back</button>
+          <button class="btn primary" onclick="App.step2Next()">Continue →</button>
+        </div>
+      </div>
+    </div><!-- /screen2 -->
+
+    <!-- ════════════ SCREEN 3 : SYMPTOMS ════════════ -->
+    <div id="screen3" class="screen">
+      <div class="card">
+        <div class="card-head">
+          <h2>Symptoms over the last 2 weeks</h2>
+          <p>Select all that apply — used by the Naive Bayes classifier as feature inputs.</p>
+        </div>
+
+        <div class="sym-section">
+          <div class="sym-heading">Emotional</div>
+          <div class="tag-cloud" id="tagEmotional">
+            <button class="tag" onclick="App.toggleTag(this)">Sadness / low mood</button>
+            <button class="tag" onclick="App.toggleTag(this)">Anxiety / worry</button>
+            <button class="tag" onclick="App.toggleTag(this)">Irritability</button>
+            <button class="tag" onclick="App.toggleTag(this)">Mood swings</button>
+            <button class="tag" onclick="App.toggleTag(this)">Hopelessness</button>
+            <button class="tag" onclick="App.toggleTag(this)">Loss of interest</button>
+            <button class="tag" onclick="App.toggleTag(this)">Excessive guilt</button>
+            <button class="tag" onclick="App.toggleTag(this)">Emptiness</button>
+          </div>
+        </div>
+
+        <div class="sym-section">
+          <div class="sym-heading">Physical</div>
+          <div class="tag-cloud" id="tagPhysical">
+            <button class="tag" onclick="App.toggleTag(this)">Fatigue</button>
+            <button class="tag" onclick="App.toggleTag(this)">Headaches</button>
+            <button class="tag" onclick="App.toggleTag(this)">Sleep problems</button>
+            <button class="tag" onclick="App.toggleTag(this)">Appetite changes</button>
+            <button class="tag" onclick="App.toggleTag(this)">Racing heart</button>
+            <button class="tag" onclick="App.toggleTag(this)">Chest tightness</button>
+            <button class="tag" onclick="App.toggleTag(this)">Muscle tension</button>
+          </div>
+        </div>
+
+        <div class="sym-section">
+          <div class="sym-heading">Cognitive &amp; Behavioural</div>
+          <div class="tag-cloud" id="tagCognitive">
+            <button class="tag" onclick="App.toggleTag(this)">Difficulty concentrating</button>
+            <button class="tag" onclick="App.toggleTag(this)">Memory problems</button>
+            <button class="tag" onclick="App.toggleTag(this)">Procrastination</button>
+            <button class="tag" onclick="App.toggleTag(this)">Social withdrawal</button>
+            <button class="tag" onclick="App.toggleTag(this)">Negative thoughts</button>
+            <button class="tag" onclick="App.toggleTag(this)">Academic pressure</button>
+            <button class="tag" onclick="App.toggleTag(this)">Overthinking</button>
+          </div>
+        </div>
+
+        <!-- STRESS SLIDER -->
+        <div class="form-group" style="margin-top:24px;margin-bottom:0">
+          <label>Overall stress level &nbsp;<strong id="stressOut" class="slider-readout">5 / 10</strong></label>
+          <input type="range" id="stressSlider" min="0" max="10" value="5"
+            oninput="App.updateSlider(this,'stressOut')" />
+          <div class="slider-ends"><span>No stress</span><span>Extreme stress</span></div>
+        </div>
+
+        <div class="btn-row spread" style="margin-top:28px">
+          <button class="btn ghost" onclick="App.goTo(2)">← Back</button>
+          <button class="btn primary" id="analyzeBtn" onclick="App.runAnalysis()">
+            🧠 Analyze &amp; Get Report
+          </button>
+        </div>
+      </div>
+    </div><!-- /screen3 -->
+
+    <!-- ════════════ SCREEN 4 : ANALYZING ════════════ -->
+    <div id="screen4" class="screen">
+      <div class="card center-card">
+        <div class="brain-pulse">🧠</div>
+        <h3 class="analyzing-title">Analyzing your responses<span
+            class="dots"><span>.</span><span>.</span><span>.</span></span></h3>
+        <p class="analyzing-sub" id="analyzeStatus">Initializing Naive Bayes classifier…</p>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div><!-- /screen4 -->
+
+    <!-- ════════════ SCREEN 5 : REPORT ════════════ -->
+    <div id="screen5" class="screen">
+
+      <!-- REPORT HEADER -->
+      <div class="report-header">
+        <div class="rh-icon">📋</div>
+        <div class="rh-info">
+          <div class="rh-name" id="rName">–</div>
+          <div class="rh-meta" id="rMeta">–</div>
+          <div class="rh-badge" id="rBadge"><span class="bdot"></span><span id="rCondition">–</span></div>
+        </div>
+        <div class="rh-date" id="rDate">–</div>
+      </div>
+
+      <!-- SCORE CARDS -->
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="sc-label">Depression Risk</div>
+          <div class="sc-track">
+            <div class="sc-fill" id="fillDep" style="width:0"></div>
+          </div>
+          <div class="sc-num" id="numDep">–</div>
+          <div class="sc-sub">Naive Bayes estimate</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-label">Anxiety Level</div>
+          <div class="sc-track">
+            <div class="sc-fill" id="fillAnx" style="width:0"></div>
+          </div>
+          <div class="sc-num" id="numAnx">–</div>
+          <div class="sc-sub">Symptom pattern</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-label">Stress Score</div>
+          <div class="sc-track">
+            <div class="sc-fill" id="fillStr" style="width:0"></div>
+          </div>
+          <div class="sc-num" id="numStr">–</div>
+          <div class="sc-sub">Self-reported + inferred</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-label">Wellbeing Index</div>
+          <div class="sc-track">
+            <div class="sc-fill" id="fillWell" style="width:0"></div>
+          </div>
+          <div class="sc-num" id="numWell">–</div>
+          <div class="sc-sub">Composite score</div>
+        </div>
+      </div>
+
+      <!-- VISUALIZATIONS -->
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px;">
+        <div class="card" style="flex: 1; min-width: 300px; padding: 20px; margin: 0;">
+          <h4 style="margin-top: 0; text-align: center; color: var(--text);">Risk Profile (Bar Chart)</h4>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="card" style="flex: 1; min-width: 300px; padding: 20px; margin: 0;">
+          <h4 style="margin-top: 0; text-align: center; color: var(--text);">Condition Distribution</h4>
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+
+      <!-- NLP BLOCK -->
+      <div class="ai-block">
+        <div class="aib-head">
+          <div class="aib-icon" style="background-color: var(--blue); color: #fff;">⚙️</div>
+          <div>
+            <div class="aib-title">NLP Text Processing</div>
+            <div class="aib-sub">Tokenization · Stopword Removal · TF-IDF Feature Extraction</div>
+          </div>
+        </div>
+        <div class="aib-body" id="textNLP" style="font-size: 0.95em;">Loading…</div>
+      </div>
+
+      <!-- DATASET BLOCK -->
+      <div class="ai-block">
+        <div class="aib-head" style="align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="aib-icon" style="background-color: #6c5ce7; color: #fff;">📊</div>
+            <div>
+              <div class="aib-title">Dataset & Model Performance</div>
+              <div class="aib-sub">Real Clinical Dataset Integration</div>
+            </div>
+          </div>
+          <div>
+            <select id="modelSelector" onchange="App.changeModel()"
+              style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-family: 'DM Sans', sans-serif;">
+              <option value="naive_bayes">Multinomial NB</option>
+              <option value="gaussian_nb">Gaussian NB</option>
+              <option value="bernoulli_nb">Bernoulli NB</option>
+            </select>
+          </div>
+        </div>
+        <div class="aib-body" id="textDataset" style="font-size: 0.95em;">Loading…</div>
+      </div>
+
+      <!-- AI DOCTOR BLOCKS -->
+      <div class="ai-block">
+        <div class="aib-head">
+          <div class="aib-icon teal">🩺</div>
+          <div>
+            <div class="aib-title">AI Doctor's Assessment</div>
+            <div class="aib-sub">Naive Bayes + Claude AI · Project: Mind Matrix · ABES Institute of Technology</div>
+          </div>
+        </div>
+        <div class="aib-body" id="textDiagnosis">Loading…</div>
+      </div>
+
+      <div class="ai-block">
+        <div class="aib-head">
+          <div class="aib-icon purple">💊</div>
+          <div>
+            <div class="aib-title">Recommended Actions &amp; Solutions</div>
+            <div class="aib-sub">Evidence-based coping strategies personalised for you</div>
+          </div>
+        </div>
+        <div class="aib-body" id="textAdvice">Loading…</div>
+      </div>
+
+      <div class="ai-block">
+        <div class="aib-head">
+          <div class="aib-icon amber">🌱</div>
+          <div>
+            <div class="aib-title">30-Day Daily Wellness Plan</div>
+            <div class="aib-sub">Practical habits to build over the next month</div>
+          </div>
+        </div>
+        <div class="aib-body" id="textLifestyle">Loading…</div>
+      </div>
+
+
+      <div class="btn-row center" style="margin-top:32px" id="reportBtnRow">
+        <button class="btn ghost" onclick="App.restart()">← Start New Assessment</button>
+        <button class="btn primary" onclick="window.print()">🖨 Print Report</button>
+        <button id="btnDownloadPdf" class="btn primary" style="background-color: var(--teal);"
+          onclick="App.downloadPDF()">📄 Download PDF</button>
+      </div>
+    </div><!-- /screen5 -->
+
+  </main><!-- /wrap -->
+
+  <!-- API KEY MODAL -->
+  <div id="apiModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-icon">🔑</div>
+      <h3>Enter Google Gemini API Key</h3>
+      <p>This key is required to power the Live AI Chatbot.<br />
+        Get yours free at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></p>
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." />
+      <span class="err-msg" id="errApiKey" style="display:none">Please paste a valid Gemini API key</span>
+      <div class="btn-row center" style="margin-top:16px; gap: 10px;">
+        <button class="btn primary" onclick="App.saveApiKey()">Save &amp; Continue →</button>
+        <button class="btn ghost" onclick="App.closeApiModal()">Skip &amp; Use Server Key</button>
+      </div>
+      <p class="modal-note">The key is securely saved in your browser's localStorage.</p>
+    </div>
+  </div>
+
+  <!-- ════════════ CHATBOT UI ════════════ -->
+  <button id="chatFab" class="chat-fab" onclick="ChatBot.toggleChat()">
+    💬
+  </button>
+
+  <div id="chatWindow" class="chat-window">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <span class="chat-bot-icon">🧠</span>
+        <div>
+          <h4>Mind Matrix AI</h4>
+          <small>Mental Health Assistant</small>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="chat-header-btn" onclick="document.getElementById('apiModal').classList.add('open')"
+          title="API Settings">🔑</button>
+        <button class="chat-close" onclick="ChatBot.toggleChat()">×</button>
+      </div>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="message bot-msg">
+        Hello! I'm your AI mental health assistant. How are you feeling today?
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="ChatBot.handleEnter(event)" />
+      <button class="chat-send" onclick="ChatBot.sendMessage()">➤</button>
+    </div>
+  </div>
+
+
+
+  <!-- HISTORY MODAL -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-icon">⏳</div>
+      <h3>Your History</h3>
+      <p>Past assessments and interactions.</p>
+
+      <div id="historyContainer"
+        style="text-align: left; margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+        <!-- History items will be injected here -->
+      </div>
+
+      <div class="btn-row center" style="margin-top:16px">
+        <button class="btn ghost" onclick="Auth.clearHistory()" style="color: #ff6b6b; border-color: #ff6b6b;">Clear
+          History</button>
+        <button class="btn ghost" onclick="Auth.closeHistory()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2"></script>
+</body>
+
+</html>
